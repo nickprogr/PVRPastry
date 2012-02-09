@@ -14,14 +14,16 @@ public class Message implements Serializable{
     private String msg, key;
     private NodeAddress addr;
     private Object o;
+    private long timestamp;  /* timestamp in milliseconds. */
 
     
     
-    public Message(String msg, NodeAddress addr, Object o, String key) {
+    public Message(String msg, NodeAddress addr, Object o, String key, long ts) {
         this.msg = msg;
         this.addr = addr;
         this.o = o;
         this.key = key;
+        this.timestamp = ts;
     }
 
     
@@ -44,6 +46,11 @@ public class Message implements Serializable{
         return key;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    
     
     
 
@@ -65,6 +72,10 @@ public class Message implements Serializable{
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
     
     

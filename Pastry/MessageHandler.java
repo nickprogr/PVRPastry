@@ -8,6 +8,7 @@ package Pastry;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,7 +49,9 @@ public class MessageHandler implements Runnable{
     private void checkMessage(Message receivedMsg){
 
         //...//
-        //System.out.println(receivedMsg.getMsg());
+        System.out.println("Received "+receivedMsg.getMsg()+" message...");
+        
+        
 
         if(receivedMsg.getMsg().startsWith("JOIN")){
             Pastry.route(receivedMsg, AppInstance.myNode);
@@ -65,6 +68,21 @@ public class MessageHandler implements Runnable{
         }
         else if(receivedMsg.getMsg().equals("STATE")){
             AppInstance.updateState(receivedMsg);
+        }
+        else if(receivedMsg.getMsg().equals("ACK_LEAF_QUESTION")){
+            
+            if(AppInstance.myNode.getState().getTimeLastUpdated() > receivedMsg.getTimestamp()){
+                Pastry.forward(new Message("LEAFSET", AppInstance.myNode.getAddress(), AppInstance.myNode.getState().getLeafSet(), receivedMsg.getKey(), Calendar.getInstance().getTimeInMillis()), receivedMsg.getAddress());
+            }
+            else{
+                Pastry.forward(new Message("ACK_LEAF_ANSWER", AppInstance.myNode.getAddress(), null, receivedMsg.getKey(), receivedMsg.getTimestamp()), receivedMsg.getAddress());
+            }
+        }
+        else if(receivedMsg.getMsg().equals("ACK_LEAF_ANSWER")){
+            AppInstance.stateBuilt = true;
+        
+            /* Inform all nodes in current node's state. */
+            AppInstance.informArrival();
         }
 
 

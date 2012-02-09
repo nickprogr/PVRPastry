@@ -108,43 +108,43 @@ public class MessageServer  implements Runnable {
      * Method that recognizes the type of the message and decides further action.
      */
     
-    private void checkMessage(Message receivedMsg){
+    //private void checkMessage(Message receivedMsg){
         
         //...//
         //System.out.println(receivedMsg.getMsg());
         
-        if(receivedMsg.getMsg().startsWith("JOIN")){ 
+        /*if(receivedMsg.getMsg().startsWith("JOIN")){ 
             Pastry.route(receivedMsg, AppInstance.myNode);
         }
         else if(receivedMsg.getMsg().equals("ROUTEROW")){
             AppInstance.constructRoutingTableRow(receivedMsg);
-        }
+        }*/
         /* currently not implemented */
         /*else if(receivedMsg.getMsg().equals("NEIGHSET")){
             AppInstance.constructNeighborhoodSet(receiveMsg);
         }*/
-        else if(receivedMsg.getMsg().equals("LEAFSET")){
+        /*else if(receivedMsg.getMsg().equals("LEAFSET")){
             AppInstance.constructLeafSet(receivedMsg);
         }
         else if(receivedMsg.getMsg().equals("STATE")){
             AppInstance.updateState(receivedMsg);
-        }
+        }*/
         
         
         
         
         //...//
-        else{
+        /*else{
             
             System.err.println(receivedMsg.getMsg());
             
-        }
+        }*/
         
         
         /* OTHER CASES */
         
         
-    }
+    //}
     
     
 }

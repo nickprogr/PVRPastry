@@ -7,6 +7,7 @@ package Pastry;
 
 
 import java.math.BigInteger;
+import java.util.Calendar;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -66,7 +67,7 @@ public class Pastry {
                 
                 
             while(prfx >= 0){
-                Pastry.forward(new Message("ROUTEROW", n.getAddress(), n.getState().getRoutingTable().getTableRow(prfx), ((Integer) prfx).toString()) , msg.getAddress());
+                Pastry.forward(new Message("ROUTEROW", n.getAddress(), n.getState().getRoutingTable().getTableRow(prfx), ((Integer) prfx).toString(), 0) , msg.getAddress());
                     prfx--;
             }
             
@@ -130,7 +131,7 @@ public class Pastry {
             if(!nid.equals(n.getAddress().getNodeID())){
                 
                 if(msg.getMsg().startsWith("JOIN")){
-                    int prfx = shl(n.getAddress().getNodeID(), msg.getKey());
+                    int prfx = shl(nid, msg.getKey());
                     
                     msg.setMsg(new String("JOIN"+prfx));
                 }
@@ -152,7 +153,7 @@ public class Pastry {
 
                     }*/
 
-                    Pastry.forward(new Message("LEAFSET", n.getAddress(), n.getState().getLeafSet(), msg.getKey()) , msg.getAddress());
+                    Pastry.forward(new Message("LEAFSET", n.getAddress(), n.getState().getLeafSet(), msg.getKey(), Calendar.getInstance().getTimeInMillis()) , msg.getAddress());
 
                 }
                 
@@ -342,7 +343,7 @@ public class Pastry {
                 else{
                     
                     if(msg.getMsg().startsWith("JOIN"))
-                        Pastry.forward(new Message("LEAFSET", n.getAddress(), n.getState().getLeafSet(), msg.getKey()) , msg.getAddress());
+                        Pastry.forward(new Message("LEAFSET", n.getAddress(), n.getState().getLeafSet(), msg.getKey(), Calendar.getInstance().getTimeInMillis()) , msg.getAddress());
                     
                 }
                  

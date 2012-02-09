@@ -1,6 +1,7 @@
 package Pastry;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
@@ -47,7 +48,7 @@ public class AppInstance {
         else{
                 
             //createJoinMessage//
-            final Message joinMsg = new Message("JOIN0", myNode.getAddress(), null, myNode.getAddress().getNodeID());
+            final Message joinMsg = new Message("JOIN0", myNode.getAddress(), null, myNode.getAddress().getNodeID(), 0);
         
             Pastry.forward(joinMsg, bootstrapAddress);
             
@@ -188,7 +189,10 @@ public class AppInstance {
         ls.setLargeSet(temp_large);
         ls.setNumOfLeaves(ls.getSmallSet().size() + ls.getLargeSet().size());
         
+        
+        
         myNode.getState().setLeafSet(ls);
+        myNode.getState().setTimeLastUpdated(Calendar.getInstance().getTimeInMillis());
         
         
         
@@ -283,19 +287,17 @@ public class AppInstance {
         }
         
         
+        /* Sends the original timestamp back to the sender. */
+        Pastry.forward(new Message("ACK_LEAF_QUESTION", myNode.getAddress(), null, msg.getKey(), msg.getTimestamp()), msg.getAddress());
         
         
         
-        stateBuilt = true;
+        //stateBuilt = true;
         
         /* Inform all nodes in current node's state. */
-        AppInstance.informArrival();
+        //AppInstance.informArrival();
         
-        
-        
-        
-         
-        
+          
     }
     
     
@@ -397,11 +399,11 @@ public class AppInstance {
 
 
         for(NodeAddress na : temp)
-            Pastry.forward(new Message("STATE", myNode.getAddress(), myNode.getState(), myNode.getAddress().getNodeID()), na);
+            Pastry.forward(new Message("STATE", myNode.getAddress(), myNode.getState(), myNode.getAddress().getNodeID(), 0), na);
         
         
         //...//
-        /*System.out.println("\n\n***BOOTSTRAP***\n\nLEAF SET "+myNode.getState().getLeafSet().getNumOfLeaves());
+        System.out.println("\n\n***BOOTSTRAP***\n\nLEAF SET "+myNode.getState().getLeafSet().getNumOfLeaves());
         System.out.println("SMALL");
         for(NodeAddress na : myNode.getState().getLeafSet().getSmallSet())
             if(na != null)
@@ -409,9 +411,9 @@ public class AppInstance {
         System.out.println("LARGE");
         for(NodeAddress na : myNode.getState().getLeafSet().getLargeSet())
             if(na != null)
-                System.out.println(na.getNodeID());*/
+                System.out.println(na.getNodeID());
         
-        System.out.println("\n\n***BOOTSTRAP***\n\nROUTING TABLE "+myNode.getState().getRoutingTable().getNumOfEntries());
+        /*System.out.println("\n\n***BOOTSTRAP***\n\nROUTING TABLE "+myNode.getState().getRoutingTable().getNumOfEntries());
         for(RoutingTableRow rtr : myNode.getState().getRoutingTable().getTable()){
             System.out.print("ROW - "+rtr.getNumOfEntries()+" :  ");
             for(NodeAddress na : rtr.getRow()){
@@ -421,7 +423,7 @@ public class AppInstance {
                     System.out.print(" null ");
             }
             System.out.println("");
-        }
+        }*/
         
     }
     
@@ -525,7 +527,9 @@ public class AppInstance {
             ls.setLargeSet(temp_large);
             ls.setNumOfLeaves(ls.getSmallSet().size() + ls.getLargeSet().size());
         
+            
             myNode.getState().setLeafSet(ls);
+            myNode.getState().setTimeLastUpdated(Calendar.getInstance().getTimeInMillis());
 
 
         }
@@ -644,7 +648,7 @@ public class AppInstance {
         
         
         //...//
-        /*System.out.println("\n\n***UPDATE***\n\nLEAF SET "+myNode.getState().getLeafSet().getNumOfLeaves());
+        System.out.println("\n\n***UPDATE***\n\nLEAF SET "+myNode.getState().getLeafSet().getNumOfLeaves());
         System.out.println("SMALL");
         for(NodeAddress na : myNode.getState().getLeafSet().getSmallSet())
             if(na != null)
@@ -652,9 +656,9 @@ public class AppInstance {
         System.out.println("LARGE");
         for(NodeAddress na : myNode.getState().getLeafSet().getLargeSet())
             if(na != null)
-                System.out.println(na.getNodeID());*/
+                System.out.println(na.getNodeID());
         
-        System.out.println("\n\n***UPDATE***\n\nROUTING TABLE "+myNode.getState().getRoutingTable().getNumOfEntries());
+        /*System.out.println("\n\n***UPDATE***\n\nROUTING TABLE "+myNode.getState().getRoutingTable().getNumOfEntries());
         for(RoutingTableRow rtr : myNode.getState().getRoutingTable().getTable()){
             System.out.print("ROW - "+rtr.getNumOfEntries()+" :  ");
             for(NodeAddress na : rtr.getRow()){
@@ -664,7 +668,7 @@ public class AppInstance {
                     System.out.print(" null ");
             }
             System.out.println("");
-        }
+        }*/
            
         
     }
@@ -686,6 +690,7 @@ public class AppInstance {
         catch (InterruptedException ex) {
             ex.printStackTrace();
         }
+         
         
         
         
@@ -697,7 +702,11 @@ public class AppInstance {
         }
         catch(Exception e){}*/
         
+        /*Calendar c = Calendar.getInstance();
+        long l = c.getTimeInMillis();
         
+        try{System.out.println(Utilities.objectToByteArray(l).length);}
+        catch(Exception e){e.printStackTrace();}*/
         
         
     }
