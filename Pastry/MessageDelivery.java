@@ -1,28 +1,18 @@
 package Pastry;
 
 import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
-
-/**
- *
- * @author nickprogr
- */
 
 
 public class MessageDelivery {
     
-    /**
-     * 
-     * 
-     */
-    public static void sendMessage(Message msg, NodeAddress addr) {
+    public static void sendMessage(Message msg, NodeAddress addr) throws ConnectException{
         
         DatagramSocket outgoingSocket = null;
         DatagramPacket outgoingMsg = null;
@@ -35,24 +25,28 @@ public class MessageDelivery {
             
             buf = new byte[500];
             
-            //...//
-            //System.out.println("TTTT:  "+Utilities.objectToByteArray(msg).length);
-            //System.out.println("KKKK:  "+Utilities.objectToByteArray(addr).length);
             
             buf = Utilities.objectToByteArray(msg);
             
             outgoingSocket = new DatagramSocket();
 
-            InetSocketAddress remoteIP = new InetSocketAddress(addr.getIp(),addr.getSocketPortNumber()); // NEW CODE
-            outSock = new Socket();                                                // NEW CODE
-            outSock.connect(remoteIP, 5000);                                       // NEW CODE
-            outSock.setSoTimeout(5000);                                            // NEW CODE
+            InetSocketAddress remoteIP = new InetSocketAddress(addr.getIp(),addr.getSocketPortNumber()); 
+            outSock = new Socket();                                                
+            outSock.connect(remoteIP, 2500);                                       
+            outSock.setSoTimeout(2500);                                            
 
             outgoingMsg = new DatagramPacket(buf, buf.length, InetAddress.getByName(addr.getIp()), addr.getSocketPortNumber());
             
         }
         catch (Exception e){
+            
+            if(e.getClass().getName().equals("java.net.ConnectException")){
+                System.err.println(addr.getNodeID()+" has departed !");
+                throw ((ConnectException)e);
+            }
+            
             e.printStackTrace();
+            return;
         }
         
         
@@ -61,11 +55,10 @@ public class MessageDelivery {
         
         try{
             
-            System.out.println("Sending "+msg.getMsg()+" message...");
-            //outgoingSocket.send(outgoingMsg);
+            System.out.println("Sending "+msg.getMsg()+" message to "+addr.getNodeID()+"...");
 
-            out = outSock.getOutputStream();        // NEW CODE
-            out.write(outgoingMsg.getData());       // NEW CODE
+            out = outSock.getOutputStream();        
+            out.write(outgoingMsg.getData());       
             
             outSock.close();
         }
@@ -75,6 +68,7 @@ public class MessageDelivery {
         }
         catch (Exception e){
             e.printStackTrace();
+            outgoingSocket.close();
         } 
         
     }

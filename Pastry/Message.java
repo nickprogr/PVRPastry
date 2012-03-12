@@ -1,10 +1,5 @@
 package Pastry;
 
-/**
- * 
- * @author nickprogr
- */
-
 import java.io.Serializable;
 
 

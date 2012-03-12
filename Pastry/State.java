@@ -2,12 +2,6 @@ package Pastry;
 
 import java.io.Serializable;
 
-/**
- *
- * @author nickprogr
- */
-
-
 public class State implements Serializable{
     
     private RoutingTable routingTable; 

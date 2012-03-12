@@ -1,7 +1,3 @@
-//NIKOLAOS VITSAS 3070011
-//NIKOLAOS PROMPONAS-KEFALAS 3070172
-//PANAGIOTIS ROUSIS 3070149
-//POLITIS CHRISTOS 3070169
 package Pastry;
 
 import java.io.Serializable;
@@ -27,15 +23,15 @@ public class RoutingTableRow implements Serializable {
 
     
     //getters
-    public NodeAddress[] getRow() {
+    public synchronized NodeAddress[] getRow() {
         return row;
     }
 
-    public NodeAddress getRowIndex(int index){
+    public synchronized NodeAddress getRowIndex(int index){
         return row[index];
     }
 
-    public byte getNumOfEntries() {
+    public synchronized byte getNumOfEntries() {
         return numOfEntries;
     }
     
@@ -45,22 +41,22 @@ public class RoutingTableRow implements Serializable {
 
     
     //setters
-    public void setRow(NodeAddress[] row) {
+    public synchronized void setRow(NodeAddress[] row) {
         this.row = row;
     }
 
-    public void setRowIndex(NodeAddress n, int index){
+    public synchronized void setRowIndex(NodeAddress n, int index){
         row[index] = n;
     }
 
-    public void setNumOfEntries(byte numOfEntries) {
+    public synchronized void setNumOfEntries(byte numOfEntries) {
         this.numOfEntries = numOfEntries;
     }
     
     
     
     
-    public void calculateNumOfEntries(){
+    public synchronized void calculateNumOfEntries(){
         
         this.numOfEntries = 0;
         
@@ -72,8 +68,14 @@ public class RoutingTableRow implements Serializable {
     }
     
     
-    public byte numOfEntriesPlusPlus(){
+    public synchronized byte numOfEntriesPlusPlus(){
         this.numOfEntries++;
+        return this.numOfEntries;
+    }
+    
+    
+    public synchronized byte numOfEntriesMinusMinus(){
+        this.numOfEntries--;
         return this.numOfEntries;
     }
 

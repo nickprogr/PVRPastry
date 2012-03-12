@@ -1,10 +1,5 @@
 package Pastry;
 
-/**
- * 
- * @author nickprogr
- */
-
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -62,14 +57,12 @@ public class MulticastRequest {
             requestSocket.setLoopbackMode(false);
             System.out.println("Making join request...");
             requestSocket.send(request);
-            listeningSocket.setSoTimeout(1500);
+            listeningSocket.setSoTimeout(1000);
 
 
 
             listeningSocket.receive(answer);
             NodeAddress addr = (NodeAddress)Utilities.byteArrayToObject(answer.getData());
-            //NodeClient.numOfNodes = info.getBoot_clue();
-            //System.out.println("Found a bootstrap server at: "+ addr.getBindName());
             System.out.println("Found a bootstrap server at: "+ addr.getIp()+" "+addr.getNodeID());
 
             listeningSocket.close();

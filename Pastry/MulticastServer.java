@@ -1,10 +1,5 @@
 package Pastry;
 
-/**
- * 
- * @author nickprogr
- */
-
 import java.io.IOException;
 import java.net.MulticastSocket;
 import java.net.DatagramSocket;
@@ -16,7 +11,7 @@ import java.net.DatagramPacket;
 public class MulticastServer implements Runnable {
     
     NodeAddress addr;
-
+    static MulticastSocket listeningSocket;
     
     
     public MulticastServer (NodeAddress addr){
@@ -33,7 +28,7 @@ public class MulticastServer implements Runnable {
     public void run(){
         
         
-        MulticastSocket listeningSocket = null;
+        listeningSocket = null;
         DatagramSocket responseSocket = null;
         DatagramPacket joinMsg = null;
         DatagramPacket bootstrapMsg  = null;
@@ -78,7 +73,6 @@ public class MulticastServer implements Runnable {
 
                 if(request.equals("BOOT")) {
 
-                    //info.setBoot_clue(NodeClient.numOfNodes);
                     buf = Utilities.objectToByteArray(addr);
                     bootstrapMsg = new DatagramPacket(buf, buf.length, joinMsg.getAddress(), 4440);
                     responseSocket.send(bootstrapMsg);
@@ -86,7 +80,15 @@ public class MulticastServer implements Runnable {
                 
              }
              catch (IOException ex){
-                 ex.printStackTrace();
+                 
+                 if(ex.getClass().getName().equals("java.net.SocketException")){
+                    if(AppInstance.departing) 
+                        System.err.println("This node has departed ! ! !");
+                    else
+                        ex.printStackTrace();
+                 }
+                 else
+                    ex.printStackTrace();
              }
              catch (ClassNotFoundException cnfe){
                  cnfe.printStackTrace();

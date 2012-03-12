@@ -1,19 +1,16 @@
-//NIKOLAOS VITSAS 3070011
-//NIKOLAOS PROMPONAS-KEFALAS 3070172
-//PANAGIOTIS ROUSIS 3070149
-//POLITIS CHRISTOS 3070169
 package Pastry;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-
+import java.util.concurrent.Semaphore;
 
 public class LeafSet implements Serializable {
 
     private ArrayList<NodeAddress> largeSet;
     private ArrayList<NodeAddress> smallSet;
     private int numOfLeaves;
+    private final Semaphore binarySemaphore;
 
     
     
@@ -23,14 +20,15 @@ public class LeafSet implements Serializable {
         this.largeSet = largeSet;
         this.smallSet = smallSet;
         this.numOfLeaves = numOfLeaves;
+        this.binarySemaphore = new Semaphore(1, true);  /* Semaphore to ensure that only 1 procedure at a time */
+                                                        /* will access this instance. */
     }
 
     public LeafSet() {
-        //this.smallSet = new NodeAddress[16];
-        //this.largeSet = new NodeAddress[16];
         this.smallSet = new ArrayList<NodeAddress>(16);
         this.largeSet = new ArrayList<NodeAddress>(16);
         this.numOfLeaves = 0;
+        this.binarySemaphore = new Semaphore(1, true);
     }
 
 
@@ -39,15 +37,15 @@ public class LeafSet implements Serializable {
 
 
     //getters
-    public ArrayList<NodeAddress> getLargeSet() {
+    public synchronized ArrayList<NodeAddress> getLargeSet() {
         return largeSet;
     }
 
-    public ArrayList<NodeAddress> getSmallSet() {
+    public synchronized ArrayList<NodeAddress> getSmallSet() {
         return smallSet;
     }
 
-    public NodeAddress getLeafLarge(int i){
+    public synchronized NodeAddress getLeafLarge(int i){
         
         try{
             return largeSet.get(i);
@@ -57,7 +55,7 @@ public class LeafSet implements Serializable {
         }
     }
 
-    public NodeAddress getLeafSmall(int i){
+    public synchronized NodeAddress getLeafSmall(int i){
         
         try{
             return smallSet.get(i);
@@ -67,7 +65,7 @@ public class LeafSet implements Serializable {
         }
     }
     
-    public NodeAddress getLeafByID(String nid){
+    public synchronized NodeAddress getLeafByID(String nid){
         
         for(NodeAddress na : this.smallSet)
             if(na.getNodeID().equals(nid))
@@ -80,7 +78,7 @@ public class LeafSet implements Serializable {
         return null;
     }
     
-    public int getNumOfLeaves() {
+    public synchronized int getNumOfLeaves() {
         return numOfLeaves;
     }
     
@@ -89,10 +87,10 @@ public class LeafSet implements Serializable {
     /**
      * Returns the entry with the minimum nodeID in the entire LeafSet. 
      */
-    public NodeAddress getMin(){
+    public synchronized NodeAddress getMin() throws NullPointerException{
         
         if(this.numOfLeaves == 0)
-            return null;
+            throw new NullPointerException();
         else{
             
             if(!this.smallSet.isEmpty())
@@ -108,10 +106,10 @@ public class LeafSet implements Serializable {
     /**
      * Returns the entry with the maximum nodeID in the entire LeafSet. 
      */
-    public NodeAddress getMax(){
+    public synchronized NodeAddress getMax() throws NullPointerException{
         
         if(this.numOfLeaves == 0)
-            return null;
+            throw new NullPointerException();
         else{
             
             if(!this.largeSet.isEmpty()){
@@ -143,22 +141,25 @@ public class LeafSet implements Serializable {
         
     }
 
+    public Semaphore getBinarySemaphore() {
+        return binarySemaphore;
+    }
 
+    
 
 
 
     
-    //settersArrayList<NodeAddress>
-    public void setLargeSet(ArrayList<NodeAddress> largeSet) {
+    //setters
+    public synchronized void setLargeSet(ArrayList<NodeAddress> largeSet) {
         this.largeSet = largeSet;
     }
 
-    public void setSmallSet(ArrayList<NodeAddress> smallSet) {
+    public synchronized void setSmallSet(ArrayList<NodeAddress> smallSet) {
         this.smallSet = smallSet;
     }
 
-    public void setLeafLarge(int i, NodeAddress n){
-        
+    public synchronized void setLeafLarge(int i, NodeAddress n){
         try{
             this.largeSet.set(i, n);
         }
@@ -175,8 +176,7 @@ public class LeafSet implements Serializable {
         }
     }
 
-    public void setLeafSmall(int i, NodeAddress n){
-        
+    public synchronized void setLeafSmall(int i, NodeAddress n){
         try{
             this.smallSet.set(i, n);
         }
@@ -193,7 +193,7 @@ public class LeafSet implements Serializable {
         }
     }
 
-    public void setNumOfLeaves(int numOfLeaves) {
+    public synchronized void setNumOfLeaves(int numOfLeaves) {
         this.numOfLeaves = numOfLeaves;
     }
 
@@ -201,14 +201,72 @@ public class LeafSet implements Serializable {
 
 
     //sorts
-    public void sortSmaller(){
+    public synchronized void sortSmaller(){
         Collections.sort(smallSet);
     }
 
-    public void sortLarger(){
+    public synchronized void sortLarger(){
         Collections.sort(largeSet);
     }
 
 
+    
+    
+    
+    
+    public void semAcquire(){
+        try{
+            this.binarySemaphore.acquire();
+        }
+        catch(InterruptedException ie){ie.printStackTrace();}
+    }
+    
+    public void semRelease(){
+        this.binarySemaphore.release();
+    }
 
+    
+    
+    public boolean contains(NodeAddress addr){
+        
+        String id = addr.getNodeID();
+        
+        for(NodeAddress na : this.largeSet)
+            if(na.getNodeID().equals(id))
+                return true;
+        
+        for(NodeAddress na : this.smallSet)
+            if(na.getNodeID().equals(id))
+                return true;
+        
+        
+        return false;
+    }
+    
+    
+    
+    public boolean remove(NodeAddress addr){
+        
+        String id = addr.getNodeID();
+        
+        for(NodeAddress na : this.largeSet){
+            if(na.getNodeID().equals(id)){
+                this.largeSet.remove(na);
+                return true;
+            }
+        }
+        
+        for(NodeAddress na : this.smallSet){
+            if(na.getNodeID().equals(id)){
+                this.smallSet.remove(na);
+                return true;
+            }
+        }
+        
+        
+        return false;
+        
+    }
+    
+    
 }

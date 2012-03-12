@@ -1,4 +1,12 @@
-PVRPastry is a JAVA implementation of Antony Rowstron's and Peter Druschel's PASTRY and it is under development.
+PVRPastry is a LAN-based File Transfer application, built over a middleware 
+implementation of Antony Rowstron's and Peter Druschel's PASTRY 
+(http://research.microsoft.com/en-us/um/people/antr/PAST/pastry.pdf),
+and it is under development.
+
+February 2012,
+Nicholas Promponas, Athens University of Economics and Business (AUEB)
+Nick Vitsas, Athens University of Economics and Business (AUEB)
+Panagiotis Rousis, Athens University of Economics and Business (AUEB)
 
 PVRPastry is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

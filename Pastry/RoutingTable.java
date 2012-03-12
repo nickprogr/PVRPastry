@@ -1,17 +1,16 @@
-//NIKOLAOS VITSAS 3070011
-//NIKOLAOS PROMPONAS-KEFALAS 3070172
-//PANAGIOTIS ROUSIS 3070149
-//POLITIS CHRISTOS 3070169
 package Pastry;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 public class RoutingTable implements Serializable{
 
     private int numOfEntries;
     private List<RoutingTableRow> table;
+    private final Semaphore binarySemaphore;    /* Semaphore to ensure that only 1 procedure at a time */
+                                                /* will access this instance. */
 
 
     
@@ -20,18 +19,21 @@ public class RoutingTable implements Serializable{
     public RoutingTable() {
         this.table = new ArrayList<RoutingTableRow>();
         this.numOfEntries = 0;
+        this.binarySemaphore = new Semaphore(1, true);
     }
 
 
     public RoutingTable(List<RoutingTableRow> rt) {
         this.table = new ArrayList<RoutingTableRow>(rt);
         this.numOfEntries = rt.size();
+        this.binarySemaphore = new Semaphore(1, true);
     }
 
 
     public RoutingTable(int numOfEntries, List<RoutingTableRow> rt) {
         this.table = new ArrayList<RoutingTableRow>(rt);
         this.numOfEntries = numOfEntries;
+        this.binarySemaphore = new Semaphore(1, true);
     }
 
 
@@ -39,12 +41,12 @@ public class RoutingTable implements Serializable{
 
 
     //getters
-    public List<RoutingTableRow> getTable() {
+    public synchronized List<RoutingTableRow> getTable() {
         return table;
     }
 
     
-    public RoutingTableRow getTableRow(int index){
+    public synchronized RoutingTableRow getTableRow(int index){
         
         try{
             return table.get(index);
@@ -63,13 +65,13 @@ public class RoutingTable implements Serializable{
     }
 
     
-    public int getNumOfEntries() {
+    public synchronized int getNumOfEntries() {
         return numOfEntries;
     }
     
     
     /* Returns the element at row 'x' and collumn 'y' of the routing table. */
-    public NodeAddress getEntry(int x , int y){
+    public synchronized NodeAddress getEntry(int x , int y){
 
         if(x > this.table.size() || y > 15)
             return null;
@@ -91,18 +93,22 @@ public class RoutingTable implements Serializable{
         }
     }
     
+    public Semaphore getBinarySemaphore() {
+        return binarySemaphore;
+    }
+    
     
 
     
 
 
     //setters
-    public void setTable(List<RoutingTableRow> rt) {
+    public synchronized void setTable(List<RoutingTableRow> rt) {
         this.table = new ArrayList<RoutingTableRow>(rt);
     }
 
     
-    public void setTableRow(int index, RoutingTableRow row){
+    public synchronized void setTableRow(int index, RoutingTableRow row){
         
         try{
             table.set(index, row);
@@ -121,7 +127,7 @@ public class RoutingTable implements Serializable{
     }
 
     
-    public void setNumOfEntries(int numOfEntries) {
+    public synchronized void setNumOfEntries(int numOfEntries) {
         this.numOfEntries = numOfEntries;
     }
     
@@ -130,7 +136,7 @@ public class RoutingTable implements Serializable{
     
     
     //exists
-    public boolean exists(NodeAddress addr){
+    public synchronized boolean exists(NodeAddress addr){
         
         for(RoutingTableRow rtr : this.table){
             for(NodeAddress na : rtr.getRow()){
@@ -147,7 +153,10 @@ public class RoutingTable implements Serializable{
     }
     
     
-    public void calculateNumOfEntries(){
+    
+    
+    
+    public synchronized void calculateNumOfEntries(){
         
         this.numOfEntries = 0;
         
@@ -159,10 +168,28 @@ public class RoutingTable implements Serializable{
     }
     
     
-    public int numOfEntriesPlusPlus(){
+    public synchronized int numOfEntriesPlusPlus(){
         this.numOfEntries++;
         return this.numOfEntries;
     }
 
     
+    public synchronized int numOfEntriesMinusMinus(){
+        this.numOfEntries--;
+        return this.numOfEntries;
+    }
+    
+    
+    
+    
+    public void semAcquire(){
+        try{
+            this.binarySemaphore.acquire();
+        }
+        catch(InterruptedException ie){ie.printStackTrace();}
+    }
+    
+    public void semRelease(){
+        this.binarySemaphore.release();
+    }
 }
